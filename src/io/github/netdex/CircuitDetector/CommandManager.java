@@ -109,7 +109,8 @@ public class CommandManager implements CommandExecutor {
             // Sets the threshold that a circuit must meet before being destroyed automatically. Defaults to 0.
             else if(arg.equalsIgnoreCase("setthreshold")){
                 if(args.length < 2){
-                    return false;
+                    Utility.sendMessage(player, "The threshold is " + CircuitDetector.threshold + ".");
+                    return true;
                 }
                 
                 int threshold = 0;

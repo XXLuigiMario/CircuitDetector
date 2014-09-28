@@ -39,7 +39,7 @@ import org.bukkit.scheduler.BukkitScheduler;
 public class CircuitDetector extends JavaPlugin implements Listener {
 	public static HashMap<String, Boolean> logging = new HashMap<String, Boolean>(); // Stores players who are logging
 	public static HashMap<Location, Integer> violations = new HashMap<Location, Integer>(); // Stores violations
-	protected static int threshold = 0; // The threshold at which to destroy circuits
+	public static int threshold = 0; // The threshold at which to destroy circuits
 	private FileConfiguration config;
 	private Thread existenceListener;
 	private ExistenceListener listener;
