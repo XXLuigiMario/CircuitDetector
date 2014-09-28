@@ -79,10 +79,19 @@ public class CommandManager implements CommandExecutor {
             else if(arg.equalsIgnoreCase("kill")){
                 if(args.length < 4)
                     return false;
-                int x = Integer.parseInt(args[1]);
-                int y = Integer.parseInt(args[2]);
-                int z = Integer.parseInt(args[3]);
-
+                int x = 0;
+                int y = 0;
+                int z = 0;
+                
+                try{
+	                x = Integer.parseInt(args[1]);
+	                y = Integer.parseInt(args[2]);
+	                z = Integer.parseInt(args[3]);
+                } catch (NumberFormatException nfe){
+                	Utility.sendMessage(player, "Coordinates must be integers.");
+                	return true;
+                }
+                
                 Location loc = new Location(player.getWorld(), x, y, z);
                 Block b = loc.getBlock();
 
@@ -102,7 +111,16 @@ public class CommandManager implements CommandExecutor {
                 if(args.length < 2){
                     return false;
                 }
-                int threshold = Integer.parseInt(args[1]);
+                
+                int threshold = 0;
+                
+                try{
+                	threshold = Integer.parseInt(args[1]);
+                }catch(NumberFormatException nfe){
+                	Utility.sendMessage(player, "Threshold must be an integer.");
+                	return true;
+                }
+                
                 if(threshold < 0){
                 	Utility.sendMessage(player, "Threshold cannot be negative.");
                     return true;
