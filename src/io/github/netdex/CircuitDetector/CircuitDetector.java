@@ -1,20 +1,15 @@
 package io.github.netdex.CircuitDetector;
 
+import io.github.netdex.CircuitDetector.listeners.BlockBreakListener;
 import io.github.netdex.CircuitDetector.listeners.ExistenceListener;
-import io.github.netdex.CircuitDetector.util.Utility;
+import io.github.netdex.CircuitDetector.listeners.RedstoneUpdateListener;
 
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -52,6 +47,9 @@ public class CircuitDetector extends JavaPlugin implements Listener {
 	
 	public void onEnable(){
 		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new RedstoneUpdateListener(), this);
+		getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
+		
 		listener = new ExistenceListener(this);
 		existenceListener = new Thread(listener);
 		existenceListener.start();
@@ -80,6 +78,7 @@ public class CircuitDetector extends JavaPlugin implements Listener {
             }
         }, 0L, refreshTime * 20L); 
 	}
+	
 	public void onDisable(){
 		listener.kill();
 		config.set("threshold", threshold);
@@ -88,44 +87,6 @@ public class CircuitDetector extends JavaPlugin implements Listener {
 		
 		violations = null;
 		logging = null;
-	}
-	
-	@SuppressWarnings("deprecation")
-	@EventHandler
-	public void onBlockRedstoneChange(BlockRedstoneEvent event){ // Handles the main use of this plugin, when a redstone event happens, log it as a violation
-		Block b = event.getBlock();
-		if(event.getOldCurrent() == 0){
-			if(Utility.isRedstone(b)){
-				if(violations.get(b.getLocation()) == null){ // If this violation is new, give it a count of 1
-					violations.put(b.getLocation(), 1);
-				}
-				else{
-					violations.put(b.getLocation(), violations.get(b.getLocation()) + 1); // Add 1 to the violation count
-				}
-				if(violations.get(b.getLocation()) > threshold && threshold != 0){ // If the threshold is passed, destroy the circuit
-					Utility.destroyCircuit(b, true);
-				}
-				for(String s : logging.keySet()){
-					if(logging.get(s)){ // Send a message to all players who have logging enabled
-						Player player = Bukkit.getPlayer(s);
-						
-						String formattedLocation = Utility.formatLocation(b.getLocation());
-						String msg = ChatColor.BLUE + Utility.getDate() + ChatColor.DARK_GRAY + " : " + ChatColor.AQUA + "\"" + ChatColor.ITALIC + b.getType().name() 
-								+ ChatColor.AQUA + "\" at " + ChatColor.GRAY + formattedLocation 
-								+ ChatColor.DARK_RED + " x" + violations.get(b.getLocation());
-						player.sendMessage(msg);
-					}
-				}
-			}
-			
-		}
-	}
-	@EventHandler
-	public void onBlockBreak(BlockBreakEvent event){ // Remove the violations if the violating block is broken, pretty much useless because of ExistenceListener
-		Location loc = event.getBlock().getLocation();
-		if(violations.containsKey(loc)){
-			violations.remove(loc);
-		}
 	}
 	
 	/**
